@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas locales — Subestación YB-6000KVA</title>
+<style>
+:root{
+  --panel:#101418; --bezel:#171d23; --raise:#1e262e; --rule:#2a333d;
+  --ink:#e9eff3; --dim:#8798a4; --faint:#5b6b77;
+  --off:#28323b;
+  --verde:#25d07d; --ambar:#ffb02e; --rojo:#ff4d4f; --cian:#4ec8f5;
+  --label:'Arial Narrow','Helvetica Neue',Roboto,system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,'DejaVu Sans Mono',monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--panel);color:var(--ink);
+  font-family:var(--mono);font-size:14px;-webkit-font-smoothing:antialiased}
+body{padding-bottom:40px}
+.lbl{font-family:var(--label);text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+
+/* ---- barra superior: cabecera de equipo ---- */
+header{position:sticky;top:0;z-index:20;background:linear-gradient(#1b232a,#141a20);
+  border-bottom:1px solid var(--rule);box-shadow:0 6px 18px rgba(0,0,0,.45)}
+.hd{display:flex;align-items:center;gap:14px;padding:10px 16px;flex-wrap:wrap}
+.marca{font-family:var(--label);text-transform:uppercase;letter-spacing:.2em;font-size:12px;color:var(--faint)}
+.marca b{color:var(--ink);letter-spacing:.14em;display:block;font-size:15px}
+.estado{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:7px;background:#0c1116;border:1px solid var(--rule);
+  border-radius:2px;padding:5px 10px;letter-spacing:.06em}
+.pulso{width:9px;height:9px;border-radius:50%;background:var(--off);box-shadow:inset 0 0 3px #000}
+.pulso.on{background:var(--verde);box-shadow:0 0 8px var(--verde)}
+.pulso.err{background:var(--rojo);box-shadow:0 0 8px var(--rojo)}
+
+nav{display:flex;gap:0;overflow-x:auto;border-top:1px solid #0a0e12;background:#0d1216}
+nav button{flex:0 0 auto;background:none;border:0;border-bottom:2px solid transparent;color:var(--faint);
+  padding:11px 18px;cursor:pointer;font-family:var(--label);text-transform:uppercase;
+  letter-spacing:.14em;font-size:12px;font-weight:700}
+nav button:hover{color:var(--ink)}
+nav button[aria-selected=true]{color:var(--cian);border-bottom-color:var(--cian);background:#111820}
+nav button:focus-visible{outline:2px solid var(--cian);outline-offset:-2px}
+
+main{max-width:1080px;margin:0 auto;padding:18px 16px}
+section[hidden]{display:none}
+
+.card{background:var(--bezel);border:1px solid var(--rule);border-radius:3px;margin-bottom:16px}
+.card>h2{margin:0;padding:11px 14px;font-family:var(--label);text-transform:uppercase;letter-spacing:.16em;
+  font-size:12px;color:var(--dim);border-bottom:1px solid var(--rule);background:#141a20;
+  display:flex;align-items:center;gap:10px}
+.card>h2 .n{color:var(--faint);font-variant-numeric:tabular-nums}
+.body{padding:14px}
+.nota{color:var(--dim);font-size:12.5px;line-height:1.55;margin:0 0 12px}
+.nota b{color:var(--ink)}
+
+/* ---- controles ---- */
+.rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:5px;font-family:var(--label);text-transform:uppercase;
+  letter-spacing:.1em;font-size:11px;color:var(--dim);font-weight:700}
+input,select,textarea{background:#0b0f13;border:1px solid var(--rule);color:var(--ink);
+  padding:8px 9px;border-radius:2px;font-family:var(--mono);font-size:13.5px;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cian);box-shadow:0 0 0 2px rgba(78,200,245,.15)}
+button.b{background:#232d36;border:1px solid #3a4854;color:var(--ink);padding:9px 16px;border-radius:2px;
+  cursor:pointer;font-family:var(--label);text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:700}
+button.b:hover{background:#2c3946;border-color:var(--cian)}
+button.b:disabled{opacity:.4;cursor:not-allowed}
+button.b.pri{background:#0f4a63;border-color:#1d7ea6;color:#dff4ff}
+button.b.pri:hover{background:#146080}
+button.b.alto{background:#4a1416;border-color:#8d2b2e;color:#ffd9d9}
+.fila{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:12px}
+
+/* ---- bornera: elemento distintivo ---- */
+.strip{border-top:1px solid var(--rule)}
+.pt{display:grid;grid-template-columns:74px 30px 1fr auto;align-items:center;gap:0;
+  border-bottom:1px solid #212a33;padding:11px 0;position:relative}
+.borne{font-family:var(--mono);font-size:12px;color:var(--ink);background:#0b0f13;border:1px solid #39454f;
+  border-left:3px solid #55636e;border-radius:2px;padding:6px 0;text-align:center;letter-spacing:.04em}
+.cable{height:2px;background:repeating-linear-gradient(90deg,var(--off) 0 4px,transparent 4px 8px)}
+.pt.act .cable{background:var(--ambar)}
+.pt.act.disp .cable{background:var(--rojo)}
+.desc{padding:0 14px;min-width:0}
+.desc .n1{font-family:var(--label);text-transform:uppercase;letter-spacing:.09em;font-size:13.5px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.desc .n2{color:var(--faint);font-size:11.5px;margin-top:2px}
+.led{width:16px;height:16px;border-radius:50%;background:var(--off);border:1px solid #0a0e12;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.8);margin-right:6px;flex:0 0 auto}
+.pt.act .led{background:var(--ambar);box-shadow:0 0 10px var(--ambar),inset 0 0 3px #7a4a00}
+.pt.act.disp .led{background:var(--rojo);box-shadow:0 0 12px var(--rojo)}
+.est{display:flex;align-items:center;gap:8px;padding-left:10px}
+.est .tag{font-family:var(--label);text-transform:uppercase;letter-spacing:.1em;font-size:10.5px;
+  color:var(--faint);border:1px solid var(--rule);padding:3px 6px;border-radius:2px}
+.pt.act .tag{color:var(--ambar);border-color:#6b4a13}
+.pt.act.disp .tag{color:var(--rojo);border-color:#7a2b2d}
+@keyframes flash{0%{background:rgba(255,176,46,.18)}100%{background:transparent}}
+.pt.nuevo{animation:flash 1.1s ease-out}
+
+.crudo{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.crudo .bin{font-size:19px;letter-spacing:.14em;color:var(--cian)}
+.crudo small{color:var(--faint);font-size:11.5px}
+
+/* ---- tablas / salida ---- */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-family:var(--label);text-transform:uppercase;letter-spacing:.1em;font-size:10.5px;color:var(--dim);
+  text-align:left;padding:7px 8px;border-bottom:1px solid var(--rule);position:sticky;top:0;background:#141a20}
+td{padding:6px 8px;border-bottom:1px solid #1e262e;font-variant-numeric:tabular-nums}
+tr.hit td{background:rgba(78,200,245,.09)}
+tr.chg td{background:rgba(255,176,46,.12)}
+.scroll{max-height:340px;overflow:auto;border:1px solid var(--rule);border-radius:2px}
+pre.out{background:#0b0f13;border:1px solid var(--rule);padding:11px;border-radius:2px;overflow:auto;
+  font-size:12.5px;line-height:1.5;color:var(--dim);white-space:pre-wrap;margin:12px 0 0;max-height:260px}
+.ok{color:var(--verde)} .mal{color:var(--rojo)} .warn{color:var(--ambar)}
+.msg{margin-top:12px;padding:9px 11px;border-left:3px solid var(--rule);background:#0d1217;font-size:12.5px;color:var(--dim)}
+.msg.ok{border-left-color:var(--verde)} .msg.mal{border-left-color:var(--rojo);color:#ffc9ca}
+ul.ev{list-style:none;margin:0;padding:0;font-size:12.5px;max-height:240px;overflow:auto}
+ul.ev li{padding:6px 0;border-bottom:1px solid #1e262e;display:flex;gap:10px}
+ul.ev time{color:var(--faint);flex:0 0 auto}
+.adv{border:1px solid #6b3a10;background:#20170a;color:#ffd8a8;padding:11px 13px;border-radius:2px;
+  font-size:12.5px;line-height:1.55;margin-bottom:14px}
+a{color:var(--cian)}
+@media (max-width:600px){
+  .pt{grid-template-columns:64px 18px 1fr;row-gap:6px}
+  .est{grid-column:1/-1;padding-left:0}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="marca">Gravitas Sun Harvest, S.A.<b>Subestación YB-6000KVA · Pruebas locales</b></div>
+    <div class="estado">
+      <span class="chip"><span class="pulso" id="pulso"></span><span id="txtEnlace">Sin conexión</span></span>
+      <span class="chip" id="chipLat">— ms</span>
+    </div>
+  </div>
+  <nav id="tabs">
+    <button aria-selected="true" data-t="enlace">Enlace</button>
+    <button data-t="alarmas">Alarmas X6</button>
+    <button data-t="explorador">Explorador</button>
+    <button data-t="comparador">Comparador</button>
+    <button data-t="signoff">Sign-off</button>
+    <button data-t="datos">Datos</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ================= ENLACE ================= -->
+<section id="s-enlace">
+  <div class="card">
+    <h2><span class="n">01</span> Equipo y conexión</h2>
+    <div class="body">
+      <p class="nota">Configure primero la tarjeta de red de la laptop en <b>172.20.251.100</b>, máscara <b>255.255.0.0</b>, puerta de enlace <b>172.20.251.1</b>. Sin eso el NRT-333T no responde.</p>
+      <div class="rejilla">
+        <label class="f">Perfil<select id="perfil"></select></label>
+        <label class="f">Dirección IP<input id="ip" value="172.20.251.88"></label>
+        <label class="f">Puerto TCP<input id="puerto" type="number" value="502"></label>
+        <label class="f">Unit ID<input id="unit" type="number" value="1"></label>
+      </div>
+      <div class="fila">
+        <button class="b pri" id="btnConectar">Conectar</button>
+        <button class="b" id="btnPing">Probar red (ping + 502)</button>
+      </div>
+      <div id="msgEnlace"></div>
+      <pre class="out" id="outPing" hidden></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">02</span> Lectura puntual</h2>
+    <div class="body">
+      <p class="nota">Para sondear cualquier registro suelto. Toda lectura queda guardada en <b>datos/lecturas_AAAAMMDD.csv</b>.</p>
+      <div class="rejilla">
+        <label class="f">Función<select id="lFc">
+          <option value="3">03 · Holding registers</option>
+          <option value="4">04 · Input registers</option>
+          <option value="2">02 · Discrete inputs</option>
+          <option value="1">01 · Coils</option>
+        </select></label>
+        <label class="f">Dirección<input id="lDir" type="number" value="55"></label>
+        <label class="f">Numeración<select id="lBase">
+          <option value="1-based">1-based (como el manual)</option>
+          <option value="0-based">0-based (offset crudo)</option>
+        </select></label>
+        <label class="f">Cantidad<input id="lCant" type="number" value="1"></label>
+        <label class="f">Etiqueta<input id="lEtq" placeholder="ej. registro DI"></label>
+      </div>
+      <div class="fila"><button class="b" id="btnLeer">Leer</button></div>
+      <div id="msgLeer"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ALARMAS ================= -->
+<section id="s-alarmas" hidden>
+  <div class="card">
+    <h2><span class="n">03</span> Bornera X6 · alarmas no eléctricas</h2>
+    <div class="body">
+      <p class="nota">Deje el monitoreo corriendo y accione cada punto en bornera con puente seco. Cada transición se estampa con hora en <b>datos/eventos_AAAAMMDD.csv</b> — ese archivo es su evidencia de prueba.</p>
+      <div class="rejilla">
+        <label class="f">Función<select id="aFc">
+          <option value="3">03 · Holding</option>
+          <option value="4">04 · Input</option>
+          <option value="2">02 · Discrete inputs</option>
+          <option value="1">01 · Coils</option>
+        </select></label>
+        <label class="f">Registro<input id="aDir" type="number" value="55"></label>
+        <label class="f">Numeración<select id="aBase">
+          <option value="1-based">1-based</option>
+          <option value="0-based">0-based</option>
+        </select></label>
+        <label class="f">Intervalo (ms)<input id="aInt" type="number" value="800"></label>
+      </div>
+      <div class="fila">
+        <button class="b pri" id="btnMon">Iniciar monitoreo</button>
+        <button class="b" id="btnUnaLectura">Leer una vez</button>
+      </div>
+      <div id="msgAlarma"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Estado de entradas digitales</h2>
+    <div class="body">
+      <div class="crudo">
+        <span class="lbl" style="color:var(--dim);font-size:11px">Valor crudo</span>
+        <span class="bin" id="bin">···· ···· ···· ····</span>
+        <small id="crudoDec">dec —</small>
+        <small id="crudoHora"></small>
+      </div>
+      <div class="strip" id="strip"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Bitácora de transiciones</h2>
+    <div class="body"><ul class="ev" id="listaEv"><li><time>—</time><span style="color:var(--faint)">Sin transiciones registradas todavía.</span></li></ul></div>
+  </div>
+</section>
+
+<!-- ================= EXPLORADOR ================= -->
+<section id="s-explorador" hidden>
+  <div class="card">
+    <h2><span class="n">04</span> Barrido de registros</h2>
+    <div class="body">
+      <p class="nota">El manual dice registro 55, pero los fabricantes documentan indistintamente 0-based y 1-based. Barra un rango amplio y verá dónde vive el dato de verdad. Los valores distintos de cero salen resaltados.</p>
+      <div class="rejilla">
+        <label class="f">Función<select id="eFc">
+          <option value="3">03 · Holding</option>
+          <option value="4">04 · Input</option>
+          <option value="2">02 · Discrete inputs</option>
+          <option value="1">01 · Coils</option>
+        </select></label>
+        <label class="f">Desde<input id="eIni" type="number" value="0"></label>
+        <label class="f">Hasta<input id="eFin" type="number" value="120"></label>
+      </div>
+      <div class="fila">
+        <button class="b pri" id="btnEscanear">Barrer rango</button>
+        <label class="f" style="flex-direction:row;align-items:center;gap:8px">
+          <input type="checkbox" id="soloNoCero" style="width:auto" checked> Solo valores ≠ 0
+        </label>
+      </div>
+      <div id="msgEsc"></div>
+      <div class="scroll" id="tblEsc" hidden></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COMPARADOR ================= -->
+<section id="s-comparador" hidden>
+  <div class="card">
+    <h2><span class="n">05</span> Comparador antes / después</h2>
+    <div class="body">
+      <p class="nota">Para mapear señales que no aparecen documentadas. Tome la <b>captura A</b> con todo en reposo, accione una sola señal en bornera, tome la <b>captura B</b> y compare: lo que cambió es su punto. Cada hallazgo se guarda en <b>datos/hallazgos_AAAAMMDD.csv</b>.</p>
+      <div class="rejilla">
+        <label class="f">Función<select id="cFc">
+          <option value="3">03 · Holding</option>
+          <option value="4">04 · Input</option>
+        </select></label>
+        <label class="f">Desde<input id="cIni" type="number" value="0"></label>
+        <label class="f">Hasta<input id="cFin" type="number" value="200"></label>
+      </div>
+      <div class="fila">
+        <button class="b" id="btnA">Captura A · reposo</button>
+        <button class="b" id="btnB">Captura B · señal activa</button>
+        <button class="b pri" id="btnComparar">Comparar</button>
+      </div>
+      <div id="msgComp"></div>
+      <div class="scroll" id="tblComp" hidden></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIGN-OFF ================= -->
+<section id="s-signoff" hidden>
+  <div class="card">
+    <h2><span class="n">06</span> Protocolo de aceptación</h2>
+    <div class="body">
+      <p class="nota">Los cuatro puntos del acta del manual. Al guardar se genera un CSV con hora de cada resultado, listo para adjuntar al expediente.</p>
+      <div id="tblSign"></div>
+      <div class="fila"><button class="b pri" id="btnSign">Guardar acta</button></div>
+      <div id="msgSign"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Prueba 4 · recordatorio de disparo forzado</h2>
+    <div class="body">
+      <div class="adv"><b>Esta prueba no se hace desde aquí.</b> Va por USB A-B al frente del P3U30 con eSetup Easergy Pro: nivel Operator (clave 0001) → menú Relays → Forcing Flag → forzar T1 (X3:16-17) a 1. El pulso de 0,5 s abre físicamente la RMU BRM6-24. Verifique antes que nadie esté trabajando aguas abajo y desactive el Forcing Flag al terminar.</div>
+      <p class="nota">Nunca deje la laptop ni los cables de comunicación conectados durante pruebas de rigidez dieléctrica o inyección secundaria: los transitorios destruyen los transceptores del relé.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DATOS ================= -->
+<section id="s-datos" hidden>
+  <div class="card">
+    <h2><span class="n">07</span> Bitácora manual</h2>
+    <div class="body">
+      <p class="nota">Para lo que no captura ningún registro: número de serie, quién firmó, qué borne estaba flojo.</p>
+      <div class="rejilla">
+        <label class="f">Categoría<select id="nCat">
+          <option>nota</option><option>hallazgo</option><option>pendiente</option><option>desviación</option>
+        </select></label>
+      </div>
+      <label class="f" style="margin-top:12px">Texto<textarea id="nTxt" rows="3" placeholder="ej. DI 5 no responde, borne X6:5 sin continuidad hacia el ZF Gauge"></textarea></label>
+      <div class="fila"><button class="b pri" id="btnNota">Registrar</button></div>
+      <div id="msgNota"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Archivos generados</h2>
+    <div class="body">
+      <div class="fila" style="margin-top:0"><button class="b" id="btnArch">Actualizar lista</button></div>
+      <div id="listaArch" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Escritura Modbus</h2>
+    <div class="body">
+      <div class="adv">Escribir registros en un equipo energizado puede accionar salidas reales. Actívelo solo si sabe exactamente a qué dirección le está escribiendo.</div>
+      <label class="f" style="flex-direction:row;align-items:center;gap:9px">
+        <input type="checkbox" id="chkEscr" style="width:auto"> Habilitar modo escritura
+      </label>
+      <div class="rejilla" style="margin-top:12px">
+        <label class="f">Función<select id="wFc"><option value="6">06 · Registro único</option><option value="5">05 · Coil única</option></select></label>
+        <label class="f">Dirección<input id="wDir" type="number" value="0"></label>
+        <label class="f">Numeración<select id="wBase"><option value="1-based">1-based</option><option value="0-based">0-based</option></select></label>
+        <label class="f">Valor<input id="wVal" type="number" value="0"></label>
+      </div>
+      <div class="fila"><button class="b alto" id="btnEscribir" disabled>Escribir</button></div>
+      <div id="msgEscr"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const el = (t,c,x) => { const n=document.createElement(t); if(c)n.className=c; if(x!==undefined)n.textContent=x; return n; };
+let CFG=null, timerMon=null;
+
+async function post(ruta, datos){
+  try{
+    const r = await fetch(ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos||{})});
+    return await r.json();
+  }catch(e){ return {ok:false,error:'La herramienta no respondió. ¿Sigue corriendo campo.py en la terminal?'}; }
+}
+function msg(destino, texto, clase){
+  const d=$(destino); d.innerHTML='';
+  if(!texto) return;
+  const n=el('div','msg '+(clase||''),texto); d.appendChild(n);
+}
+function enlaceOk(equipo, ms){
+  $('#pulso').className='pulso on';
+  $('#txtEnlace').textContent = equipo.ip+':'+equipo.puerto+' · UID '+equipo.unit_id;
+  if(ms!==undefined) $('#chipLat').textContent = ms+' ms';
+}
+function enlaceMal(){ $('#pulso').className='pulso err'; }
+
+/* ---------- pestañas ---------- */
+$('#tabs').addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-selected', x===b));
+  document.querySelectorAll('main section').forEach(s=>s.hidden = s.id !== 's-'+b.dataset.t);
+});
+
+/* ---------- arranque ---------- */
+(async function init(){
+  const r = await post('/api/config',{});
+  if(!r.ok){ msg('#msgEnlace', r.error, 'mal'); return; }
+  CFG = r.config;
+  const sel=$('#perfil');
+  CFG.equipos.forEach((q,i)=>{ const o=el('option',null,q.nombre); o.value=i; sel.appendChild(o); });
+  sel.addEventListener('change',()=>{
+    const q=CFG.equipos[sel.value];
+    $('#ip').value=q.ip; $('#puerto').value=q.puerto; $('#unit').value=q.unit_id;
+    msg('#msgEnlace', q.nota, '');
+  });
+  pintarStrip(CFG.puntos.map(p=>({...p,valor:0})));
+  pintarSignoff();
+  if(r.conectado) enlaceOk(r.conectado);
+})();
+
+/* ---------- enlace ---------- */
+$('#btnConectar').onclick = async () => {
+  msg('#msgEnlace','Conectando…','');
+  const r = await post('/api/conectar',{ip:$('#ip').value.trim(),puerto:+$('#puerto').value,unit_id:+$('#unit').value});
+  if(r.ok){ enlaceOk(r.equipo); msg('#msgEnlace','Socket TCP abierto. Ya puede leer registros.','ok'); }
+  else { enlaceMal(); msg('#msgEnlace', r.error, 'mal'); }
+};
+
+$('#btnPing').onclick = async () => {
+  msg('#msgEnlace','Probando red…','');
+  const r = await post('/api/ping',{ip:$('#ip').value.trim(),puerto:+$('#puerto').value});
+  if(!r.ok){ msg('#msgEnlace',r.error,'mal'); return; }
+  const x=r.resultado, p=x.puerto502;
+  let t;
+  if(x.ok) t = 'Ping respondiendo. Promedio '+x.promedio+' ms — '+(x.cumple_5ms?'cumple el criterio <5 ms.':'POR ENCIMA de 5 ms, revise cable y auto-negociación.');
+  else t = 'Sin respuesta ICMP. Revise LED NET-1/NET-A, cable Cat 6 y la IP estática de la laptop.';
+  t += p.ok ? '  Puerto 502 abierto ('+p.ms+' ms).' : '  Puerto 502 cerrado: '+(p.error||'');
+  msg('#msgEnlace', t, x.ok&&p.ok?'ok':(x.ok?'':'mal'));
+  const out=$('#outPing'); out.hidden=false; out.textContent=x.salida||'';
+  if(x.promedio!=null) $('#chipLat').textContent=x.promedio+' ms';
+};
+
+$('#btnLeer').onclick = async () => {
+  const r = await post('/api/leer',{fc:+$('#lFc').value,direccion:+$('#lDir').value,base:$('#lBase').value,
+                                   cantidad:+$('#lCant').value,etiqueta:$('#lEtq').value});
+  if(!r.ok){ msg('#msgLeer',r.error,'mal'); return; }
+  const bins = r.valores.slice(0,8).map((v,i)=>('#'+(r.direccion_usada+i)+' = '+v+'  ['+(v>>>0).toString(2).padStart(16,'0')+']')).join('\n');
+  msg('#msgLeer','Offset real consultado: '+r.direccion_usada+' · '+r.ms+' ms · guardado en CSV','ok');
+  const pre=el('pre','out',bins); $('#msgLeer').appendChild(pre);
+  $('#chipLat').textContent=r.ms+' ms';
+};
+
+/* ---------- alarmas ---------- */
+function pintarStrip(puntos){
+  const s=$('#strip'); s.innerHTML='';
+  puntos.forEach(p=>{
+    const fila=el('div','pt'+(p.valor?' act':'')+(p.accion==='disparo'?' disp':''));
+    fila.dataset.bit=p.bit;
+    fila.appendChild(el('div','borne',p.borne));
+    fila.appendChild(el('div','cable'));
+    const d=el('div','desc');
+    d.appendChild(el('div','n1',p.nombre));
+    d.appendChild(el('div','n2','DI '+p.di+' · '+p.equipo+' · registro/bit '+p.bit));
+    fila.appendChild(d);
+    const e=el('div','est');
+    e.appendChild(el('span','led'));
+    e.appendChild(el('span','tag', p.valor ? (p.accion==='disparo'?'Disparo':'Alarma') : 'Reposo'));
+    fila.appendChild(e);
+    s.appendChild(fila);
+  });
+}
+function pintarEventos(nuevos){
+  const ul=$('#listaEv');
+  if(!nuevos.length) return;
+  if(ul.dataset.vacio!=='no'){ ul.innerHTML=''; ul.dataset.vacio='no'; }
+  nuevos.forEach(ev=>{
+    const li=el('li');
+    li.appendChild(el('time',null,ev.hora.slice(11)));
+    const t=el('span',null, ev.borne+' · '+ev.nombre+' · '+ev.de+'→'+ev.a+(ev.a? (ev.accion==='disparo'?'  DISPARO':'  ALARMA'):'  reposo'));
+    t.style.color = ev.a ? (ev.accion==='disparo'?'var(--rojo)':'var(--ambar)') : 'var(--dim)';
+    li.appendChild(t);
+    ul.insertBefore(li, ul.firstChild);
+  });
+}
+async function leerDI(){
+  const r = await post('/api/di',{fc:+$('#aFc').value,direccion:+$('#aDir').value,base:$('#aBase').value});
+  if(!r.ok){ msg('#msgAlarma',r.error,'mal'); pararMon(); return; }
+  $('#bin').textContent = r.binario.replace(/(.{4})/g,'$1 ').trim();
+  $('#crudoDec').textContent = 'dec '+r.crudo+' · offset '+r.direccion_usada+' · FC '+String(r.fc).padStart(2,'0');
+  $('#crudoHora').textContent = new Date().toLocaleTimeString();
+  pintarStrip(r.puntos);
+  if(r.cambios.length){
+    pintarEventos(r.cambios);
+    r.cambios.forEach(c=>{
+      const f=document.querySelector('.pt[data-bit="'+(CFG.puntos.find(p=>p.di===c.di)||{}).bit+'"]');
+      if(f) f.classList.add('nuevo');
+    });
+  }
+  $('#chipLat').textContent=r.ms+' ms';
+  return r;
+}
+function pararMon(){ if(timerMon){clearInterval(timerMon);timerMon=null;} $('#btnMon').textContent='Iniciar monitoreo'; $('#btnMon').classList.add('pri'); }
+$('#btnMon').onclick = async () => {
+  if(timerMon){ pararMon(); msg('#msgAlarma','Monitoreo detenido.',''); return; }
+  const primera = await leerDI();
+  if(!primera||!primera.ok) return;
+  msg('#msgAlarma','Monitoreo activo. Accione los puntos en bornera uno por uno.','ok');
+  $('#btnMon').textContent='Detener monitoreo'; $('#btnMon').classList.remove('pri');
+  timerMon=setInterval(leerDI, Math.max(200,+$('#aInt').value));
+};
+$('#btnUnaLectura').onclick = leerDI;
+
+/* ---------- explorador ---------- */
+$('#btnEscanear').onclick = async () => {
+  msg('#msgEsc','Barriendo…','');
+  const r = await post('/api/escanear',{fc:+$('#eFc').value,inicio:+$('#eIni').value,fin:+$('#eFin').value});
+  if(!r.ok){ msg('#msgEsc',r.error,'mal'); return; }
+  const solo=$('#soloNoCero').checked;
+  const filas = solo ? r.filas.filter(f=>f.valor!==0) : r.filas;
+  const cont=$('#tblEsc'); cont.hidden=false; cont.innerHTML='';
+  const t=el('table');
+  t.innerHTML='<thead><tr><th>Offset</th><th>Manual (1-based)</th><th>Decimal</th><th>Hex</th><th>Binario</th></tr></thead>';
+  const tb=el('tbody');
+  filas.forEach(f=>{
+    const tr=el('tr', f.valor!==0?'hit':'');
+    [f.dir, f.dir+1, f.valor, '0x'+f.valor.toString(16).toUpperCase().padStart(4,'0'),
+     f.valor.toString(2).padStart(16,'0')].forEach(v=>tr.appendChild(el('td',null,String(v))));
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb); cont.appendChild(t);
+  const errs = r.errores.length ? ' · '+r.errores.length+' bloque(s) rechazados por el equipo (fuera de rango)' : '';
+  msg('#msgEsc', filas.length+' registros mostrados de '+r.filas.length+' leídos en '+r.ms+' ms'+errs, filas.length?'ok':'');
+};
+
+/* ---------- comparador ---------- */
+async function captura(cual){
+  msg('#msgComp','Capturando '+cual.toUpperCase()+'…','');
+  const r = await post('/api/snapshot',{cual,fc:+$('#cFc').value,inicio:+$('#cIni').value,fin:+$('#cFin').value});
+  msg('#msgComp', r.ok ? ('Captura '+cual.toUpperCase()+' tomada: '+r.cantidad+' registros a las '+r.hora.slice(11)) : r.error, r.ok?'ok':'mal');
+}
+$('#btnA').onclick=()=>captura('a');
+$('#btnB').onclick=()=>captura('b');
+$('#btnComparar').onclick = async () => {
+  const r = await post('/api/comparar',{});
+  if(!r.ok){ msg('#msgComp',r.error,'mal'); return; }
+  const cont=$('#tblComp'); cont.hidden=false; cont.innerHTML='';
+  if(!r.cambios.length){ msg('#msgComp','Ningún registro cambió entre A y B. La señal no está en este rango, o no llegó al equipo: revise continuidad en bornera.','warn'); return; }
+  const t=el('table');
+  t.innerHTML='<thead><tr><th>Offset</th><th>Manual</th><th>Antes</th><th>Después</th><th>Bits que cambiaron</th></tr></thead>';
+  const tb=el('tbody');
+  r.cambios.forEach(c=>{
+    const tr=el('tr','chg');
+    [c.dir,c.dir+1,c.antes,c.despues,c.bits_texto].forEach(v=>tr.appendChild(el('td',null,String(v))));
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb); cont.appendChild(t);
+  msg('#msgComp', r.cambios.length+' registro(s) cambiaron. Guardado en hallazgos_*.csv','ok');
+};
+
+/* ---------- sign-off ---------- */
+function pintarSignoff(){
+  const cont=$('#tblSign'); cont.innerHTML='';
+  const t=el('table');
+  t.innerHTML='<thead><tr><th>#</th><th>Procedimiento</th><th>Resultado esperado</th><th>Estado</th><th>Iniciales</th><th>Observaciones</th></tr></thead>';
+  const tb=el('tbody');
+  (CFG.signoff_estado||CFG.signoff).forEach(f=>{
+    const tr=el('tr'); tr.dataset.n=f.n;
+    tr.appendChild(el('td',null,String(f.n)));
+    tr.appendChild(el('td',null,f.prueba));
+    const te=el('td'); te.style.color='var(--faint)'; te.textContent=f.esperado; tr.appendChild(te);
+    const td1=el('td'); const s=el('select'); s.className='s-est';
+    ['Pendiente','Conforme','Fallo'].forEach(o=>{const op=el('option',null,o);op.value=o;s.appendChild(op);});
+    s.value=f.estado||'Pendiente'; td1.appendChild(s); tr.appendChild(td1);
+    const td2=el('td'); const i=el('input'); i.className='s-ini'; i.value=f.iniciales||''; i.placeholder='__'; td2.appendChild(i); tr.appendChild(td2);
+    const td3=el('td'); const o=el('input'); o.className='s-obs'; o.value=f.obs||''; td3.appendChild(o); tr.appendChild(td3);
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb); cont.appendChild(t);
+}
+$('#btnSign').onclick = async () => {
+  const base = CFG.signoff_estado||CFG.signoff;
+  const filas=[...document.querySelectorAll('#tblSign tbody tr')].map((tr,i)=>({
+    n:base[i].n, prueba:base[i].prueba, esperado:base[i].esperado,
+    estado:tr.querySelector('.s-est').value, iniciales:tr.querySelector('.s-ini').value,
+    obs:tr.querySelector('.s-obs').value, hora:new Date().toISOString().slice(0,19).replace('T',' ')
+  }));
+  const r = await post('/api/signoff',{filas});
+  msg('#msgSign', r.ok ? ('Acta guardada como '+r.archivo) : r.error, r.ok?'ok':'mal');
+};
+
+/* ---------- datos ---------- */
+$('#btnNota').onclick = async () => {
+  const txt=$('#nTxt').value.trim();
+  if(!txt){ msg('#msgNota','Escriba algo antes de registrar.','mal'); return; }
+  const r = await post('/api/nota',{categoria:$('#nCat').value,texto:txt});
+  if(r.ok){ $('#nTxt').value=''; msg('#msgNota','Anotado en '+r.archivo,'ok'); } else msg('#msgNota',r.error,'mal');
+};
+$('#btnArch').onclick = async () => {
+  const r = await post('/api/archivos',{});
+  const cont=$('#listaArch'); cont.innerHTML='';
+  if(!r.archivos.length){ cont.appendChild(el('div','nota','Todavía no hay archivos. Se crean solos al leer, monitorear o anotar.')); return; }
+  const t=el('table');
+  t.innerHTML='<thead><tr><th>Archivo</th><th>Tamaño</th><th>Última escritura</th></tr></thead>';
+  const tb=el('tbody');
+  r.archivos.forEach(a=>{
+    const tr=el('tr'); const td=el('td'); const link=el('a',null,a.nombre); link.href='/datos/'+a.nombre; link.download=a.nombre;
+    td.appendChild(link); tr.appendChild(td);
+    tr.appendChild(el('td',null,(a.bytes/1024).toFixed(1)+' kB'));
+    tr.appendChild(el('td',null,a.hora)); tb.appendChild(tr);
+  });
+  t.appendChild(tb); cont.appendChild(t);
+  cont.appendChild(el('div','nota','Carpeta: '+r.carpeta));
+};
+$('#chkEscr').onchange = async e => {
+  const r = await post('/api/modo-escritura',{habilitar:e.target.checked});
+  $('#btnEscribir').disabled = !r.habilitada;
+  msg('#msgEscr', r.habilitada ? 'Modo escritura habilitado. Verifique la dirección antes de cada envío.' : 'Modo escritura bloqueado.', r.habilitada?'mal':'');
+};
+$('#btnEscribir').onclick = async () => {
+  const r = await post('/api/escribir',{fc:+$('#wFc').value,direccion:+$('#wDir').value,base:$('#wBase').value,valor:+$('#wVal').value});
+  msg('#msgEscr', r.ok ? ('Escritura confirmada por el equipo en '+r.ms+' ms') : r.error, r.ok?'ok':'mal');
+};
+</script>
+</body>
+</html>
