@@ -116,6 +116,21 @@ ul.ev time{color:var(--faint);flex:0 0 auto}
 .adv{border:1px solid #6b3a10;background:#20170a;color:#ffd8a8;padding:11px 13px;border-radius:2px;
   font-size:12.5px;line-height:1.55;margin-bottom:14px}
 a{color:var(--cian)}
+
+/* ---- checklist de prueba completa ---- */
+ul.chk{list-style:none;margin:0;padding:0;font-size:13px}
+ul.chk li{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #1e262e}
+ul.chk li:last-child{border-bottom:0}
+ul.chk .pt-ico{width:11px;height:11px;border-radius:50%;margin-top:3px;flex:0 0 auto;
+  background:var(--off);box-shadow:inset 0 0 3px #000}
+ul.chk li.ok .pt-ico{background:var(--verde);box-shadow:0 0 8px var(--verde)}
+ul.chk li.mal .pt-ico{background:var(--rojo);box-shadow:0 0 8px var(--rojo)}
+ul.chk li.corriendo .pt-ico{background:var(--ambar);box-shadow:0 0 8px var(--ambar)}
+ul.chk .txt{min-width:0}
+ul.chk .txt b{display:block;font-family:var(--label);text-transform:uppercase;letter-spacing:.08em;
+  font-size:11.5px;color:var(--ink)}
+ul.chk .txt span{color:var(--dim);font-size:12px}
+ul.chk li.mal .txt span{color:#ffb3b4}
 @media (max-width:600px){
   .pt{grid-template-columns:64px 18px 1fr;row-gap:6px}
   .est{grid-column:1/-1;padding-left:0}
@@ -134,7 +149,8 @@ a{color:var(--cian)}
     </div>
   </div>
   <nav id="tabs">
-    <button aria-selected="true" data-t="enlace">Enlace</button>
+    <button aria-selected="true" data-t="test">Test</button>
+    <button data-t="enlace">Enlace</button>
     <button data-t="alarmas">Alarmas X6</button>
     <button data-t="explorador">Explorador</button>
     <button data-t="comparador">Comparador</button>
@@ -145,8 +161,33 @@ a{color:var(--cian)}
 
 <main>
 
+<!-- ================= TEST ================= -->
+<section id="s-test">
+  <div class="card">
+    <h2><span class="n">00</span> Prueba completa · NRT-333T</h2>
+    <div class="body">
+      <p class="nota">Un solo click corre <b>red</b> (ping + puerto 2404), <b>enlace IEC 104</b> (STARTDT) e <b>interrogación general</b> contra la bornera X6 configurada. Requiere que la laptop ya tenga IP estática en <b>172.20.251.100 / 255.255.0.0</b>. Cada corrida queda en <b>datos/pruebas_AAAAMMDD.csv</b>.</p>
+      <div class="rejilla">
+        <label class="f">Perfil<select id="tPerfil"></select></label>
+        <label class="f">Dirección IP<input id="tIp" value="172.20.251.88"></label>
+        <label class="f">Puerto TCP<input id="tPuerto" type="number" value="2404"></label>
+        <label class="f">Dirección común (CA)<input id="tCa" type="number" value="1"></label>
+      </div>
+      <div class="fila"><button class="b pri" id="btnProbarTodo">Probar todo</button></div>
+      <div id="msgTest"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Resultado</h2>
+    <div class="body">
+      <ul class="chk" id="listaTest"></ul>
+    </div>
+  </div>
+</section>
+
 <!-- ================= ENLACE ================= -->
-<section id="s-enlace">
+<section id="s-enlace" hidden>
   <div class="card">
     <h2><span class="n">01</span> Equipo y conexión</h2>
     <div class="body">
@@ -154,12 +195,12 @@ a{color:var(--cian)}
       <div class="rejilla">
         <label class="f">Perfil<select id="perfil"></select></label>
         <label class="f">Dirección IP<input id="ip" value="172.20.251.88"></label>
-        <label class="f">Puerto TCP<input id="puerto" type="number" value="502"></label>
-        <label class="f">Unit ID<input id="unit" type="number" value="1"></label>
+        <label class="f">Puerto TCP<input id="puerto" type="number" value="2404"></label>
+        <label class="f">Dirección común (CA)<input id="ca" type="number" value="1"></label>
       </div>
       <div class="fila">
         <button class="b pri" id="btnConectar">Conectar</button>
-        <button class="b" id="btnPing">Probar red (ping + 502)</button>
+        <button class="b" id="btnPing">Probar red (ping + 2404)</button>
       </div>
       <div id="msgEnlace"></div>
       <pre class="out" id="outPing" hidden></pre>
@@ -169,21 +210,10 @@ a{color:var(--cian)}
   <div class="card">
     <h2><span class="n">02</span> Lectura puntual</h2>
     <div class="body">
-      <p class="nota">Para sondear cualquier registro suelto. Toda lectura queda guardada en <b>datos/lecturas_AAAAMMDD.csv</b>.</p>
+      <p class="nota">Para sondear un IOA suelto por C_RD_NA_1. Toda lectura queda guardada en <b>datos/lecturas_AAAAMMDD.csv</b>.</p>
       <div class="rejilla">
-        <label class="f">Función<select id="lFc">
-          <option value="3">03 · Holding registers</option>
-          <option value="4">04 · Input registers</option>
-          <option value="2">02 · Discrete inputs</option>
-          <option value="1">01 · Coils</option>
-        </select></label>
-        <label class="f">Dirección<input id="lDir" type="number" value="55"></label>
-        <label class="f">Numeración<select id="lBase">
-          <option value="1-based">1-based (como el manual)</option>
-          <option value="0-based">0-based (offset crudo)</option>
-        </select></label>
-        <label class="f">Cantidad<input id="lCant" type="number" value="1"></label>
-        <label class="f">Etiqueta<input id="lEtq" placeholder="ej. registro DI"></label>
+        <label class="f">IOA<input id="lIoa" type="number" value="101"></label>
+        <label class="f">Etiqueta<input id="lEtq" placeholder="ej. DI 1 gas ligero"></label>
       </div>
       <div class="fila"><button class="b" id="btnLeer">Leer</button></div>
       <div id="msgLeer"></div>
@@ -196,19 +226,8 @@ a{color:var(--cian)}
   <div class="card">
     <h2><span class="n">03</span> Bornera X6 · alarmas no eléctricas</h2>
     <div class="body">
-      <p class="nota">Deje el monitoreo corriendo y accione cada punto en bornera con puente seco. Cada transición se estampa con hora en <b>datos/eventos_AAAAMMDD.csv</b> — ese archivo es su evidencia de prueba.</p>
+      <p class="nota">"Leer una vez" manda una interrogación general para sembrar la caché; "Iniciar monitoreo" solo refresca esa caché cada tick — las actualizaciones espontáneas del equipo llegan solas por el mismo enlace. Cada transición se estampa con hora en <b>datos/eventos_AAAAMMDD.csv</b> — ese archivo es su evidencia de prueba.</p>
       <div class="rejilla">
-        <label class="f">Función<select id="aFc">
-          <option value="3">03 · Holding</option>
-          <option value="4">04 · Input</option>
-          <option value="2">02 · Discrete inputs</option>
-          <option value="1">01 · Coils</option>
-        </select></label>
-        <label class="f">Registro<input id="aDir" type="number" value="55"></label>
-        <label class="f">Numeración<select id="aBase">
-          <option value="1-based">1-based</option>
-          <option value="0-based">0-based</option>
-        </select></label>
         <label class="f">Intervalo (ms)<input id="aInt" type="number" value="800"></label>
       </div>
       <div class="fila">
@@ -223,10 +242,8 @@ a{color:var(--cian)}
     <h2>Estado de entradas digitales</h2>
     <div class="body">
       <div class="crudo">
-        <span class="lbl" style="color:var(--dim);font-size:11px">Valor crudo</span>
-        <span class="bin" id="bin">···· ···· ···· ····</span>
-        <small id="crudoDec">dec —</small>
-        <small id="crudoHora"></small>
+        <span class="lbl" style="color:var(--dim);font-size:11px">Última lectura</span>
+        <small id="crudoHora">—</small>
       </div>
       <div class="strip" id="strip"></div>
     </div>
@@ -241,25 +258,13 @@ a{color:var(--cian)}
 <!-- ================= EXPLORADOR ================= -->
 <section id="s-explorador" hidden>
   <div class="card">
-    <h2><span class="n">04</span> Barrido de registros</h2>
+    <h2><span class="n">04</span> Interrogación general</h2>
     <div class="body">
-      <p class="nota">El manual dice registro 55, pero los fabricantes documentan indistintamente 0-based y 1-based. Barra un rango amplio y verá dónde vive el dato de verdad. Los valores distintos de cero salen resaltados.</p>
+      <p class="nota">No hay rango que barrer: el equipo reporta solo. Mande una interrogación general y vea el TypeID, dirección común, IOA y valor de cada objeto — así se descubre el mapeo real sin el manual, o se confirma contra él.</p>
       <div class="rejilla">
-        <label class="f">Función<select id="eFc">
-          <option value="3">03 · Holding</option>
-          <option value="4">04 · Input</option>
-          <option value="2">02 · Discrete inputs</option>
-          <option value="1">01 · Coils</option>
-        </select></label>
-        <label class="f">Desde<input id="eIni" type="number" value="0"></label>
-        <label class="f">Hasta<input id="eFin" type="number" value="120"></label>
+        <label class="f">Espera (s)<input id="eEspera" type="number" value="5" step="0.5"></label>
       </div>
-      <div class="fila">
-        <button class="b pri" id="btnEscanear">Barrer rango</button>
-        <label class="f" style="flex-direction:row;align-items:center;gap:8px">
-          <input type="checkbox" id="soloNoCero" style="width:auto" checked> Solo valores ≠ 0
-        </label>
-      </div>
+      <div class="fila"><button class="b pri" id="btnEscanear">Interrogación general</button></div>
       <div id="msgEsc"></div>
       <div class="scroll" id="tblEsc" hidden></div>
     </div>
@@ -271,15 +276,7 @@ a{color:var(--cian)}
   <div class="card">
     <h2><span class="n">05</span> Comparador antes / después</h2>
     <div class="body">
-      <p class="nota">Para mapear señales que no aparecen documentadas. Tome la <b>captura A</b> con todo en reposo, accione una sola señal en bornera, tome la <b>captura B</b> y compare: lo que cambió es su punto. Cada hallazgo se guarda en <b>datos/hallazgos_AAAAMMDD.csv</b>.</p>
-      <div class="rejilla">
-        <label class="f">Función<select id="cFc">
-          <option value="3">03 · Holding</option>
-          <option value="4">04 · Input</option>
-        </select></label>
-        <label class="f">Desde<input id="cIni" type="number" value="0"></label>
-        <label class="f">Hasta<input id="cFin" type="number" value="200"></label>
-      </div>
+      <p class="nota">Para mapear señales que no aparecen documentadas. Tome la <b>captura A</b> con todo en reposo, accione una sola señal en bornera, tome la <b>captura B</b> y compare: lo que cambió es su punto. Cada captura es una interrogación general completa. Cada hallazgo se guarda en <b>datos/hallazgos_AAAAMMDD.csv</b>.</p>
       <div class="fila">
         <button class="b" id="btnA">Captura A · reposo</button>
         <button class="b" id="btnB">Captura B · señal activa</button>
@@ -338,20 +335,9 @@ a{color:var(--cian)}
   </div>
 
   <div class="card">
-    <h2>Escritura Modbus</h2>
+    <h2>Comandos de mando (IEC 104)</h2>
     <div class="body">
-      <div class="adv">Escribir registros en un equipo energizado puede accionar salidas reales. Actívelo solo si sabe exactamente a qué dirección le está escribiendo.</div>
-      <label class="f" style="flex-direction:row;align-items:center;gap:9px">
-        <input type="checkbox" id="chkEscr" style="width:auto"> Habilitar modo escritura
-      </label>
-      <div class="rejilla" style="margin-top:12px">
-        <label class="f">Función<select id="wFc"><option value="6">06 · Registro único</option><option value="5">05 · Coil única</option></select></label>
-        <label class="f">Dirección<input id="wDir" type="number" value="0"></label>
-        <label class="f">Numeración<select id="wBase"><option value="1-based">1-based</option><option value="0-based">0-based</option></select></label>
-        <label class="f">Valor<input id="wVal" type="number" value="0"></label>
-      </div>
-      <div class="fila"><button class="b alto" id="btnEscribir" disabled>Escribir</button></div>
-      <div id="msgEscr"></div>
+      <p class="nota">Todavía no implementado. Mandar C_SC_NA_1/C_DC_NA_1 a un equipo energizado acciona salidas reales — se agregará en una siguiente iteración, una vez confirmados los IOA de mando en el manual del NRT-333T.</p>
     </div>
   </div>
 </section>
@@ -376,7 +362,7 @@ function msg(destino, texto, clase){
 }
 function enlaceOk(equipo, ms){
   $('#pulso').className='pulso on';
-  $('#txtEnlace').textContent = equipo.ip+':'+equipo.puerto+' · UID '+equipo.unit_id;
+  $('#txtEnlace').textContent = equipo.ip+':'+equipo.puerto+' · CA '+equipo.ca;
   if(ms!==undefined) $('#chipLat').textContent = ms+' ms';
 }
 function enlaceMal(){ $('#pulso').className='pulso err'; }
@@ -389,27 +375,66 @@ $('#tabs').addEventListener('click', e=>{
 });
 
 /* ---------- arranque ---------- */
+function poblarPerfil(selId, ipId, puertoId, caId, notaDestino){
+  const sel=$(selId);
+  CFG.equipos.forEach((q,i)=>{ const o=el('option',null,q.nombre); o.value=i; sel.appendChild(o); });
+  sel.addEventListener('change',()=>{
+    const q=CFG.equipos[sel.value];
+    $(ipId).value=q.ip; $(puertoId).value=q.puerto; $(caId).value=q.ca;
+    if(notaDestino) msg(notaDestino, q.nota, '');
+  });
+}
+
 (async function init(){
   const r = await post('/api/config',{});
   if(!r.ok){ msg('#msgEnlace', r.error, 'mal'); return; }
   CFG = r.config;
-  const sel=$('#perfil');
-  CFG.equipos.forEach((q,i)=>{ const o=el('option',null,q.nombre); o.value=i; sel.appendChild(o); });
-  sel.addEventListener('change',()=>{
-    const q=CFG.equipos[sel.value];
-    $('#ip').value=q.ip; $('#puerto').value=q.puerto; $('#unit').value=q.unit_id;
-    msg('#msgEnlace', q.nota, '');
-  });
+  poblarPerfil('#perfil','#ip','#puerto','#ca','#msgEnlace');
+  poblarPerfil('#tPerfil','#tIp','#tPuerto','#tCa','#msgTest');
   pintarStrip(CFG.puntos.map(p=>({...p,valor:0})));
   pintarSignoff();
+  pintarTest(null,false);
   if(r.conectado) enlaceOk(r.conectado);
 })();
+
+/* ---------- test rápido ---------- */
+const PASOS_TEST = [
+  {id:'ping', label:'Ping ICMP'},
+  {id:'puerto', label:'Puerto 2404 TCP'},
+  {id:'conectar', label:'Enlace IEC 104 (STARTDT)'},
+  {id:'interrogacion', label:'Interrogación general · bornera X6'},
+];
+function pintarTest(pasos, corriendo){
+  const ul=$('#listaTest'); ul.innerHTML='';
+  PASOS_TEST.forEach(def=>{
+    const p = pasos && pasos.find(x=>x.id===def.id);
+    const clase = p ? (p.ok?'ok':'mal') : (corriendo?'corriendo':'');
+    const li=el('li',clase);
+    li.appendChild(el('span','pt-ico'));
+    const t=el('div','txt');
+    t.appendChild(el('b',null,def.label));
+    t.appendChild(el('span',null, p ? p.detalle : (corriendo?'esperando resultado…':'sin ejecutar')));
+    li.appendChild(t);
+    ul.appendChild(li);
+  });
+}
+$('#btnProbarTodo').onclick = async () => {
+  pintarTest(null,true);
+  $('#btnProbarTodo').disabled = true;
+  msg('#msgTest','Corriendo batería completa…','');
+  const r = await post('/api/probar-todo',{ip:$('#tIp').value.trim(),puerto:+$('#tPuerto').value,ca:+$('#tCa').value});
+  $('#btnProbarTodo').disabled = false;
+  if(!r.ok){ msg('#msgTest', r.error, 'mal'); pintarTest(null,false); return; }
+  pintarTest(r.pasos, false);
+  if(r.equipo) enlaceOk(r.equipo);
+  msg('#msgTest', r.todo_ok ? 'Todo conforme. Registrado en pruebas_*.csv' : 'Hay pasos con falla — revise el detalle abajo.', r.todo_ok?'ok':'mal');
+};
 
 /* ---------- enlace ---------- */
 $('#btnConectar').onclick = async () => {
   msg('#msgEnlace','Conectando…','');
-  const r = await post('/api/conectar',{ip:$('#ip').value.trim(),puerto:+$('#puerto').value,unit_id:+$('#unit').value});
-  if(r.ok){ enlaceOk(r.equipo); msg('#msgEnlace','Socket TCP abierto. Ya puede leer registros.','ok'); }
+  const r = await post('/api/conectar',{ip:$('#ip').value.trim(),puerto:+$('#puerto').value,ca:+$('#ca').value});
+  if(r.ok){ enlaceOk(r.equipo); msg('#msgEnlace','STARTDT confirmado. Enlace IEC 104 activo.','ok'); }
   else { enlaceMal(); msg('#msgEnlace', r.error, 'mal'); }
 };
 
@@ -417,23 +442,21 @@ $('#btnPing').onclick = async () => {
   msg('#msgEnlace','Probando red…','');
   const r = await post('/api/ping',{ip:$('#ip').value.trim(),puerto:+$('#puerto').value});
   if(!r.ok){ msg('#msgEnlace',r.error,'mal'); return; }
-  const x=r.resultado, p=x.puerto502;
+  const x=r.resultado, p=x.puerto;
   let t;
   if(x.ok) t = 'Ping respondiendo. Promedio '+x.promedio+' ms — '+(x.cumple_5ms?'cumple el criterio <5 ms.':'POR ENCIMA de 5 ms, revise cable y auto-negociación.');
   else t = 'Sin respuesta ICMP. Revise LED NET-1/NET-A, cable Cat 6 y la IP estática de la laptop.';
-  t += p.ok ? '  Puerto 502 abierto ('+p.ms+' ms).' : '  Puerto 502 cerrado: '+(p.error||'');
+  t += p.ok ? '  Puerto 2404 abierto ('+p.ms+' ms).' : '  Puerto 2404 cerrado: '+(p.error||'');
   msg('#msgEnlace', t, x.ok&&p.ok?'ok':(x.ok?'':'mal'));
   const out=$('#outPing'); out.hidden=false; out.textContent=x.salida||'';
   if(x.promedio!=null) $('#chipLat').textContent=x.promedio+' ms';
 };
 
 $('#btnLeer').onclick = async () => {
-  const r = await post('/api/leer',{fc:+$('#lFc').value,direccion:+$('#lDir').value,base:$('#lBase').value,
-                                   cantidad:+$('#lCant').value,etiqueta:$('#lEtq').value});
+  const r = await post('/api/leer',{ioa:+$('#lIoa').value,etiqueta:$('#lEtq').value});
   if(!r.ok){ msg('#msgLeer',r.error,'mal'); return; }
-  const bins = r.valores.slice(0,8).map((v,i)=>('#'+(r.direccion_usada+i)+' = '+v+'  ['+(v>>>0).toString(2).padStart(16,'0')+']')).join('\n');
-  msg('#msgLeer','Offset real consultado: '+r.direccion_usada+' · '+r.ms+' ms · guardado en CSV','ok');
-  const pre=el('pre','out',bins); $('#msgLeer').appendChild(pre);
+  const o=r.objeto;
+  msg('#msgLeer','IOA '+o.ioa+' · '+o.tipo_nombre+' ('+o.tipo_desc+') = '+o.valor+' · calidad '+o.calidad+' · '+r.ms+' ms · guardado en CSV','ok');
   $('#chipLat').textContent=r.ms+' ms';
 };
 
@@ -442,12 +465,12 @@ function pintarStrip(puntos){
   const s=$('#strip'); s.innerHTML='';
   puntos.forEach(p=>{
     const fila=el('div','pt'+(p.valor?' act':'')+(p.accion==='disparo'?' disp':''));
-    fila.dataset.bit=p.bit;
+    fila.dataset.ioa=p.ioa;
     fila.appendChild(el('div','borne',p.borne));
     fila.appendChild(el('div','cable'));
     const d=el('div','desc');
     d.appendChild(el('div','n1',p.nombre));
-    d.appendChild(el('div','n2','DI '+p.di+' · '+p.equipo+' · registro/bit '+p.bit));
+    d.appendChild(el('div','n2','DI '+p.di+' · '+p.equipo+' · IOA '+p.ioa));
     fila.appendChild(d);
     const e=el('div','est');
     e.appendChild(el('span','led'));
@@ -469,61 +492,56 @@ function pintarEventos(nuevos){
     ul.insertBefore(li, ul.firstChild);
   });
 }
-async function leerDI(){
-  const r = await post('/api/di',{fc:+$('#aFc').value,direccion:+$('#aDir').value,base:$('#aBase').value});
+async function leerDI(interrogar){
+  const r = await post('/api/di',{interrogar: interrogar!==false});
   if(!r.ok){ msg('#msgAlarma',r.error,'mal'); pararMon(); return; }
-  $('#bin').textContent = r.binario.replace(/(.{4})/g,'$1 ').trim();
-  $('#crudoDec').textContent = 'dec '+r.crudo+' · offset '+r.direccion_usada+' · FC '+String(r.fc).padStart(2,'0');
   $('#crudoHora').textContent = new Date().toLocaleTimeString();
   pintarStrip(r.puntos);
   if(r.cambios.length){
     pintarEventos(r.cambios);
     r.cambios.forEach(c=>{
-      const f=document.querySelector('.pt[data-bit="'+(CFG.puntos.find(p=>p.di===c.di)||{}).bit+'"]');
+      const f=document.querySelector('.pt[data-ioa="'+(CFG.puntos.find(p=>p.di===c.di)||{}).ioa+'"]');
       if(f) f.classList.add('nuevo');
     });
   }
-  $('#chipLat').textContent=r.ms+' ms';
   return r;
 }
 function pararMon(){ if(timerMon){clearInterval(timerMon);timerMon=null;} $('#btnMon').textContent='Iniciar monitoreo'; $('#btnMon').classList.add('pri'); }
 $('#btnMon').onclick = async () => {
   if(timerMon){ pararMon(); msg('#msgAlarma','Monitoreo detenido.',''); return; }
-  const primera = await leerDI();
+  const primera = await leerDI(true);
   if(!primera||!primera.ok) return;
   msg('#msgAlarma','Monitoreo activo. Accione los puntos en bornera uno por uno.','ok');
   $('#btnMon').textContent='Detener monitoreo'; $('#btnMon').classList.remove('pri');
-  timerMon=setInterval(leerDI, Math.max(200,+$('#aInt').value));
+  timerMon=setInterval(()=>leerDI(false), Math.max(200,+$('#aInt').value));
 };
-$('#btnUnaLectura').onclick = leerDI;
+$('#btnUnaLectura').onclick = ()=>leerDI(true);
 
 /* ---------- explorador ---------- */
 $('#btnEscanear').onclick = async () => {
-  msg('#msgEsc','Barriendo…','');
-  const r = await post('/api/escanear',{fc:+$('#eFc').value,inicio:+$('#eIni').value,fin:+$('#eFin').value});
+  msg('#msgEsc','Mandando interrogación general…','');
+  const r = await post('/api/explorar',{espera:+$('#eEspera').value});
   if(!r.ok){ msg('#msgEsc',r.error,'mal'); return; }
-  const solo=$('#soloNoCero').checked;
-  const filas = solo ? r.filas.filter(f=>f.valor!==0) : r.filas;
   const cont=$('#tblEsc'); cont.hidden=false; cont.innerHTML='';
   const t=el('table');
-  t.innerHTML='<thead><tr><th>Offset</th><th>Manual (1-based)</th><th>Decimal</th><th>Hex</th><th>Binario</th></tr></thead>';
+  t.innerHTML='<thead><tr><th>TypeID</th><th>CA</th><th>IOA</th><th>Valor</th><th>Calidad</th><th>Causa</th><th>Hora equipo</th></tr></thead>';
   const tb=el('tbody');
-  filas.forEach(f=>{
-    const tr=el('tr', f.valor!==0?'hit':'');
-    [f.dir, f.dir+1, f.valor, '0x'+f.valor.toString(16).toUpperCase().padStart(4,'0'),
-     f.valor.toString(2).padStart(16,'0')].forEach(v=>tr.appendChild(el('td',null,String(v))));
+  r.filas.forEach(f=>{
+    const tr=el('tr','hit');
+    [f.tipo_nombre+' ('+f.tipo+')', f.ca, f.ioa, String(f.valor), f.calidad||'—', f.cot_nombre, f.hora||'—']
+      .forEach(v=>tr.appendChild(el('td',null,String(v))));
     tb.appendChild(tr);
   });
   t.appendChild(tb); cont.appendChild(t);
-  const errs = r.errores.length ? ' · '+r.errores.length+' bloque(s) rechazados por el equipo (fuera de rango)' : '';
-  msg('#msgEsc', filas.length+' registros mostrados de '+r.filas.length+' leídos en '+r.ms+' ms'+errs, filas.length?'ok':'');
+  const fin = r.terminado ? '' : ' · sin fin de activación (revise la dirección común/CA)';
+  msg('#msgEsc', r.cantidad+' objetos recibidos'+fin, r.terminado?'ok':'warn');
 };
 
 /* ---------- comparador ---------- */
 async function captura(cual){
   msg('#msgComp','Capturando '+cual.toUpperCase()+'…','');
-  const r = await post('/api/snapshot',{cual,fc:+$('#cFc').value,inicio:+$('#cIni').value,fin:+$('#cFin').value});
-  msg('#msgComp', r.ok ? ('Captura '+cual.toUpperCase()+' tomada: '+r.cantidad+' registros a las '+r.hora.slice(11)) : r.error, r.ok?'ok':'mal');
+  const r = await post('/api/snapshot',{cual});
+  msg('#msgComp', r.ok ? ('Captura '+cual.toUpperCase()+' tomada: '+r.cantidad+' objetos a las '+r.hora.slice(11)) : r.error, r.ok?'ok':'mal');
 }
 $('#btnA').onclick=()=>captura('a');
 $('#btnB').onclick=()=>captura('b');
@@ -531,17 +549,17 @@ $('#btnComparar').onclick = async () => {
   const r = await post('/api/comparar',{});
   if(!r.ok){ msg('#msgComp',r.error,'mal'); return; }
   const cont=$('#tblComp'); cont.hidden=false; cont.innerHTML='';
-  if(!r.cambios.length){ msg('#msgComp','Ningún registro cambió entre A y B. La señal no está en este rango, o no llegó al equipo: revise continuidad en bornera.','warn'); return; }
+  if(!r.cambios.length){ msg('#msgComp','Ningún objeto cambió entre A y B. La señal no llegó al equipo, o su IOA no se reporta: revise continuidad en bornera.','warn'); return; }
   const t=el('table');
-  t.innerHTML='<thead><tr><th>Offset</th><th>Manual</th><th>Antes</th><th>Después</th><th>Bits que cambiaron</th></tr></thead>';
+  t.innerHTML='<thead><tr><th>IOA</th><th>Tipo</th><th>Antes</th><th>Después</th></tr></thead>';
   const tb=el('tbody');
   r.cambios.forEach(c=>{
     const tr=el('tr','chg');
-    [c.dir,c.dir+1,c.antes,c.despues,c.bits_texto].forEach(v=>tr.appendChild(el('td',null,String(v))));
+    [c.ioa,c.tipo_nombre,String(c.antes),String(c.despues)].forEach(v=>tr.appendChild(el('td',null,v)));
     tb.appendChild(tr);
   });
   t.appendChild(tb); cont.appendChild(t);
-  msg('#msgComp', r.cambios.length+' registro(s) cambiaron. Guardado en hallazgos_*.csv','ok');
+  msg('#msgComp', r.cambios.length+' objeto(s) cambiaron. Guardado en hallazgos_*.csv','ok');
 };
 
 /* ---------- sign-off ---------- */
@@ -597,15 +615,6 @@ $('#btnArch').onclick = async () => {
   });
   t.appendChild(tb); cont.appendChild(t);
   cont.appendChild(el('div','nota','Carpeta: '+r.carpeta));
-};
-$('#chkEscr').onchange = async e => {
-  const r = await post('/api/modo-escritura',{habilitar:e.target.checked});
-  $('#btnEscribir').disabled = !r.habilitada;
-  msg('#msgEscr', r.habilitada ? 'Modo escritura habilitado. Verifique la dirección antes de cada envío.' : 'Modo escritura bloqueado.', r.habilitada?'mal':'');
-};
-$('#btnEscribir').onclick = async () => {
-  const r = await post('/api/escribir',{fc:+$('#wFc').value,direccion:+$('#wDir').value,base:$('#wBase').value,valor:+$('#wVal').value});
-  msg('#msgEscr', r.ok ? ('Escritura confirmada por el equipo en '+r.ms+' ms') : r.error, r.ok?'ok':'mal');
 };
 </script>
 </body>

@@ -1,0 +1,6 @@
+﻿timestamp,ip,puerto,ca,resultado,detalle
+2026-08-27 13:20:42.193,172.20.251.88,2404,1,OK,ping:OK | puerto:OK | conectar:OK | interrogacion:OK
+2026-08-27 13:34:37.072,172.20.251.88,2404,1,FALLAS,ping:FALLO | puerto:FALLO | conectar:FALLO
+2026-08-27 13:37:12.911,172.20.251.88,2404,1,OK,ping:OK | puerto:OK | conectar:OK | interrogacion:OK
+2026-08-27 13:37:43.287,172.20.251.88,2404,1,FALLAS,ping:OK | puerto:OK | conectar:FALLO
+2026-08-27 13:37:57.989,172.20.251.88,2404,1,OK,ping:OK | puerto:OK | conectar:OK | interrogacion:OK

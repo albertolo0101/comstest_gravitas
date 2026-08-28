@@ -1,0 +1,5 @@
+﻿#,Procedimiento,Resultado esperado,Estado,Iniciales,Observaciones,Hora
+1,Enlace físico Ethernet NRT-333T,LED NET-1 o NET-A parpadea verde,Conforme,AA,,2026-08-27 19:25:49
+2,Ping test IP NRT-333T,"Ping exitoso a 172.20.251.88, latencia <5 ms",Conforme,AA,,2026-08-27 19:25:49
+3,Verificación de mapeo bornera X6,Lectura correcta de DI 1 a DI 6 en Modbus TCP,Conforme,AA,,2026-08-27 19:25:49
+4,Prueba de disparo local P3U30,Apertura física de RMU mediante Forcing Flag T1,Pendiente,,,2026-08-27 19:25:49

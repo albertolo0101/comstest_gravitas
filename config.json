@@ -1,0 +1,138 @@
+{
+  "equipos": [
+    {
+      "id": "nrt",
+      "nombre": "NRT-333T (Sala BT)",
+      "ip": "172.20.251.88",
+      "puerto": 2404,
+      "ca": 1,
+      "nota": "IEC 60870-5-104 confirmado en campo 2026-08-27: STARTDT y CA=1 funcionan, interrogación general responde 235 objetos."
+    },
+    {
+      "id": "p3u30",
+      "nombre": "Easergy P3U30 (Sala MT)",
+      "ip": "172.20.251.90",
+      "puerto": 2404,
+      "ca": 1,
+      "nota": "IP y protocolo aún no confirmados en campo. Puede requerir configuración por USB primero, y verificar si usa IEC 104 u otro protocolo."
+    },
+    {
+      "id": "sim",
+      "nombre": "Simulador local (pruebas de oficina)",
+      "ip": "127.0.0.1",
+      "puerto": 2404,
+      "ca": 1,
+      "nota": "Equipo ficticio IEC 104. Sirve para validar la herramienta sin hardware."
+    }
+  ],
+  "puntos": [
+    {
+      "di": 1,
+      "borne": "X6:1",
+      "ioa": 1,
+      "nombre": "Alarma Gas Ligero",
+      "equipo": "Relé QJ4-50",
+      "accion": "alarma"
+    },
+    {
+      "di": 2,
+      "borne": "X6:2",
+      "ioa": 2,
+      "nombre": "Disparo Gas Pesado",
+      "equipo": "Relé QJ4-50",
+      "accion": "disparo"
+    },
+    {
+      "di": 3,
+      "borne": "X6:3",
+      "ioa": 3,
+      "nombre": "Alarma Alta Temp",
+      "equipo": "Termómetro BWY-802/803",
+      "accion": "alarma"
+    },
+    {
+      "di": 4,
+      "borne": "X6:4",
+      "ioa": 4,
+      "nombre": "Disparo Ultra Alta Temp",
+      "equipo": "Termómetro BWY-802/803",
+      "accion": "disparo"
+    },
+    {
+      "di": 5,
+      "borne": "X6:5",
+      "ioa": 5,
+      "nombre": "Alarma Nivel Bajo Aceite",
+      "equipo": "Indicador YZF",
+      "accion": "alarma"
+    },
+    {
+      "di": 6,
+      "borne": "X6:6",
+      "ioa": 6,
+      "nombre": "Válvula Alivio de Presión",
+      "equipo": "YSF6-55/50 KJ",
+      "accion": "disparo"
+    }
+  ],
+  "signoff": [
+    {
+      "n": 1,
+      "prueba": "Enlace físico Ethernet NRT-333T",
+      "esperado": "LED NET-1 o NET-A parpadea verde"
+    },
+    {
+      "n": 2,
+      "prueba": "Ping test IP NRT-333T",
+      "esperado": "Ping exitoso a 172.20.251.88, latencia <5 ms"
+    },
+    {
+      "n": 3,
+      "prueba": "Verificación de mapeo bornera X6",
+      "esperado": "Interrogación general IEC 104 devuelve DI 1 a DI 6 con IOA correcto"
+    },
+    {
+      "n": 4,
+      "prueba": "Prueba de disparo local P3U30",
+      "esperado": "Apertura física de RMU mediante Forcing Flag T1"
+    }
+  ],
+  "signoff_estado": [
+    {
+      "n": 1,
+      "prueba": "Enlace físico Ethernet NRT-333T",
+      "esperado": "LED NET-1 o NET-A parpadea verde",
+      "estado": "Conforme",
+      "iniciales": "AA",
+      "obs": "",
+      "hora": "2026-08-27 19:25:49"
+    },
+    {
+      "n": 2,
+      "prueba": "Ping test IP NRT-333T",
+      "esperado": "Ping exitoso a 172.20.251.88, latencia <5 ms",
+      "estado": "Conforme",
+      "iniciales": "AA",
+      "obs": "",
+      "hora": "2026-08-27 19:25:49"
+    },
+    {
+      "n": 3,
+      "prueba": "Verificación de mapeo bornera X6",
+      "esperado": "Interrogación general IEC 104 devuelve DI 1 a DI 6 con IOA correcto",
+      "estado": "Pendiente",
+      "iniciales": "",
+      "obs": "Reabierta 2026-08-27: la firma previa (AA, 13:25) se hizo contra texto de Modbus TCP, protocolo incorrecto para este equipo. Solo DI 3 confirmado hasta ahora (correlación con luz de Alta Temp); faltan DI 1,2,4,5,6.",
+      "hora": ""
+    },
+    {
+      "n": 4,
+      "prueba": "Prueba de disparo local P3U30",
+      "esperado": "Apertura física de RMU mediante Forcing Flag T1",
+      "estado": "Pendiente",
+      "iniciales": "",
+      "obs": "",
+      "hora": "2026-08-27 19:25:49"
+    }
+  ]
+}
